@@ -33,7 +33,7 @@ export class AuthService {
         },
       });
       return {
-        acces_token: await this.generateToken(user.id, user.email),
+        accesss_token: await this.generateToken(user.id, user.email),
         id: user.id,
         email: user.email,
       };
@@ -60,7 +60,7 @@ export class AuthService {
     if (!compareResult) throw new UnauthorizedException('Invalid credentials');
 
     return {
-      acces_token: await this.generateToken(match.id, match.email),
+      access_token: await this.generateToken(match.id, match.email),
       id: match.id,
       email: match.email,
     };

@@ -1,34 +1,33 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import type { UUID } from 'crypto';
+import { JwtGuard } from '../auth/guards/jwt.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import type { UserPayload } from '../common/types/user-payload.type';
 import { WatchlistService } from './watchlist.service';
-import { CreateWatchlistDto } from './dto/create-watchlist.dto';
-import { UpdateWatchlistDto } from './dto/update-watchlist.dto';
 
 @Controller('watchlist')
 export class WatchlistController {
   constructor(private readonly watchlistService: WatchlistService) {}
 
-  @Post()
-  create(@Body() createWatchlistDto: CreateWatchlistDto) {
-    return this.watchlistService.create(createWatchlistDto);
+  @Post(':id')
+  @UseGuards(JwtGuard)
+  toggle(
+    @Param('id', ParseUUIDPipe) movieId: UUID,
+    @CurrentUser() user: UserPayload,
+  ) {
+    return this.watchlistService.toggle(movieId, user.id);
   }
 
   @Get()
-  findAll() {
-    return this.watchlistService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.watchlistService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateWatchlistDto: UpdateWatchlistDto) {
-    return this.watchlistService.update(+id, updateWatchlistDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.watchlistService.remove(+id);
+  @UseGuards(JwtGuard)
+  findAll(@CurrentUser() user: UserPayload) {
+    return this.watchlistService.findAll(user.id);
   }
 }

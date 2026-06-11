@@ -1,26 +1,42 @@
 import { Injectable } from '@nestjs/common';
-import { CreateWatchlistDto } from './dto/create-watchlist.dto';
-import { UpdateWatchlistDto } from './dto/update-watchlist.dto';
+import { UUID } from 'crypto';
+import { MoviesService } from '../movies/movies.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class WatchlistService {
-  create(createWatchlistDto: CreateWatchlistDto) {
-    return 'This action adds a new watchlist';
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly movieService: MoviesService,
+  ) {}
+
+  async toggle(movieId: UUID, userId: string) {
+    await this.movieService.findOne(movieId);
+
+    const existing = await this.prisma.watchlistItem.findUnique({
+      where: { userId_movieId: { userId, movieId } },
+    });
+
+    if (existing) {
+      await this.prisma.watchlistItem.delete({
+        where: { userId_movieId: { userId, movieId } },
+      });
+      return { added: false };
+    }
+
+    await this.prisma.watchlistItem.create({
+      data: { userId, movieId },
+    });
+    return { added: true };
   }
 
-  findAll() {
-    return `This action returns all watchlist`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} watchlist`;
-  }
-
-  update(id: number, updateWatchlistDto: UpdateWatchlistDto) {
-    return `This action updates a #${id} watchlist`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} watchlist`;
+  async findAll(userId: string) {
+    const items = await this.prisma.watchlistItem.findMany({
+      where: { userId },
+      select: {
+        movie: true,
+      },
+    });
+    return items.map((item) => item.movie);
   }
 }

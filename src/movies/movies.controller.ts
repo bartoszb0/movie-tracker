@@ -44,7 +44,7 @@ export class MoviesController {
     return Object.values(Genre);
   }
 
-  @Get(':genre')
+  @Get('genre/:genre')
   findGenreMovies(@Param('genre', new ParseEnumPipe(Genre)) genre: Genre) {
     return this.moviesService.findGenreMovies(genre);
   }

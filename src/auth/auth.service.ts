@@ -1,12 +1,10 @@
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { Prisma } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -25,27 +23,18 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(body.password, 10);
 
-    try {
-      const user = await this.prisma.user.create({
-        data: {
-          email: body.email,
-          password: hashedPassword,
-        },
-      });
-      return {
-        access_token: await this.generateToken(user.id, user.email),
-        id: user.id,
-        email: user.email,
-      };
-    } catch (error) {
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2002'
-      ) {
-        throw new ConflictException('Email already in use');
-      }
-      throw error;
-    }
+    const user = await this.prisma.user.create({
+      data: {
+        email: body.email,
+        password: hashedPassword,
+      },
+    });
+
+    return {
+      access_token: await this.generateToken(user.id, user.email),
+      id: user.id,
+      email: user.email,
+    };
   }
 
   async login(body: LoginDto) {

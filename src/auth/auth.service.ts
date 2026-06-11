@@ -33,7 +33,7 @@ export class AuthService {
         },
       });
       return {
-        accesss_token: await this.generateToken(user.id, user.email),
+        access_token: await this.generateToken(user.id, user.email),
         id: user.id,
         email: user.email,
       };

@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { UUID } from 'crypto';
+import { Genre } from '../../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
@@ -26,6 +27,14 @@ export class MoviesService {
 
   findAll() {
     return this.prisma.movie.findMany();
+  }
+
+  findGenreMovies(genre: Genre) {
+    return this.prisma.movie.findMany({
+      where: {
+        genre,
+      },
+    });
   }
 
   async findOne(id: UUID) {

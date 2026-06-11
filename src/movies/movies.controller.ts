@@ -6,12 +6,14 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseEnumPipe,
   ParseUUIDPipe,
   Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
 import type { UUID } from 'crypto';
+import { Genre } from '../../generated/prisma/enums';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { UserPayload } from '../common/types/user-payload.type';
@@ -35,6 +37,16 @@ export class MoviesController {
   @Get()
   findAll() {
     return this.moviesService.findAll();
+  }
+
+  @Get('genres')
+  getGenres() {
+    return Object.values(Genre);
+  }
+
+  @Get(':genre')
+  findGenreMovies(@Param('genre', new ParseEnumPipe(Genre)) genre: Genre) {
+    return this.moviesService.findGenreMovies(genre);
   }
 
   @Get(':id')
